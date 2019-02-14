@@ -1,0 +1,1 @@
+java -jar my-spring-boot-specific-1.0.0.jar
