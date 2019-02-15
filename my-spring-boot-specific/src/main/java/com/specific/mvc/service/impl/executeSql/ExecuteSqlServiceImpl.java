@@ -44,11 +44,11 @@ public class ExecuteSqlServiceImpl implements ExecuteSqlService {
 		Map<String, Object> map = null;
 		// 根据已知条件查询数据库,返回结果集
 		if (StringUtils.startsWith(contentType, "multipart/form-data")) {
-			map = this.getParamByForm(set);
+			map = executeSqlMethod.getParamByForm(set);
 		} else if (StringUtils.equals(contentType, "application/json")) {
 			try {
 				BufferedReader br = request.getReader();
-				map = this.getParamMapByBR(br);
+				map = executeSqlMethod.getParamMapByBR(br);
 			} catch (IOException e) {
 				return ResultInfo.error(e.getMessage());
 			}
@@ -56,99 +56,6 @@ public class ExecuteSqlServiceImpl implements ExecuteSqlService {
 			map = executeSqlMethod.parameterHandle(set);
 		}
 		return executeSqlMethod.execSql(map, dmlMark);
-	}
-
-	/**
-	 * 获取参数Map通过请求数据BufferedReader对象
-	 * 
-	 * @param br
-	 * @return
-	 * @throws IOException
-	 */
-	public Map<String, Object> getParamMapByBR(BufferedReader br) throws IOException {
-		String str = "";
-		StringBuffer wholeStr = new StringBuffer();
-		while ((str = br.readLine()) != null) {
-			wholeStr.append(str);
-		}
-		Map<String, Object> map = new LinkedHashMap<>();
-		str = wholeStr.toString();
-		if (StringUtils.isNotBlank(str)) {
-			JsonUtils<Object> jsonUtils = new JsonUtils<Object>();
-			map = jsonUtils.getMapFromStr(str);
-		}
-		return map;
-	}
-
-	/**
-	 * 获取Map集合通过form表单数据
-	 * 
-	 * @param set
-	 * @return
-	 */
-	@SuppressWarnings("unchecked")
-	public Map<String, Object> getParamByForm(Set<Entry<String, String[]>> set) {
-		Map<String, Object> map = new LinkedHashMap<String, Object>();
-		String indexMark = "@index";
-		for (Entry<String, String[]> entry : set) {
-			String key = entry.getKey();
-			List<String> list = Arrays.asList(entry.getValue());
-			String value = list.get(0);
-			Matcher matcher = keyRegExp(key);
-			if (matcher.find() && list.size() == 1) {
-				String k = matcher.group(1);
-				Integer index = Integer.valueOf(matcher.group(2));
-				String name = matcher.group(3);
-				Object object = map.get(k);
-				if (object == null) {
-					// 不存在于map集合
-					Map<String, Object> hashMap = new HashMap<String, Object>();
-					hashMap.put(name, value);
-					hashMap.put(indexMark, index);
-					List<Object> objList = new ArrayList<Object>();
-					objList.add(hashMap);
-					map.put(k, objList);
-				} else {
-					// 存在于map集合
-					List<Object> objList = (List<Object>) object;
-					boolean bool = false;
-					for (Object obj : objList) {
-						Map<String, Object> hashMap = (Map<String, Object>) obj;
-						Integer indexVal = (Integer) hashMap.get(indexMark);
-						if (index == indexVal) {
-							hashMap.put(name, value);
-							bool = true;
-							break;
-						}
-					}
-					if (!bool) {
-						Map<String, Object> hashMap = new HashMap<String, Object>();
-						hashMap.put(name, value);
-						hashMap.put(indexMark, index);
-						objList.add(hashMap);
-					}
-				}
-			} else {
-				if (list.size() == 1) {
-					map.put(key, value);
-				} else if (list.size() > 1) {
-					map.put(key, list);
-				}
-			}
-		}
-		return map;
-	}
-
-	/**
-	 * key 正则匹配
-	 * 
-	 * @param str
-	 * @return
-	 */
-	public Matcher keyRegExp(String str) {
-		String regex = "^([a-zA-Z].*)\\[(\\d+)\\]\\.([a-zA-Z].*)$";
-		Pattern r = Pattern.compile(regex);
-		return r.matcher(str);
 	}
 
 }

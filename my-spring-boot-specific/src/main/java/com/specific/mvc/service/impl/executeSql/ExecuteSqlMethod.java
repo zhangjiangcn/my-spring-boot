@@ -1,7 +1,10 @@
 package com.specific.mvc.service.impl.executeSql;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -12,6 +15,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.sql.DataSource;
 
@@ -33,6 +38,7 @@ import com.specific.mvc.entity.SpecificInterfaceParam;
 import com.specific.mvc.entity.SpecificInterfaceSql;
 import com.specific.mvc.service.SpecificInterfaceParamService;
 import com.specific.mvc.service.SpecificInterfaceSqlService;
+import com.specific.util.JsonUtils;
 import com.specific.util.ResultInfo;
 
 @Component
@@ -303,7 +309,7 @@ public class ExecuteSqlMethod {
 			return sqlManager.executeUpdate((String) map.get("sql"), map);
 		}
 	}
-
+	
 	/**
 	 * List转Map
 	 * 
@@ -331,7 +337,100 @@ public class ExecuteSqlMethod {
 		}
 		return map;
 	}
+	
+	/**
+	 * 获取参数Map通过请求数据BufferedReader对象
+	 * 
+	 * @param br
+	 * @return
+	 * @throws IOException
+	 */
+	public Map<String, Object> getParamMapByBR(BufferedReader br) throws IOException {
+		String str = "";
+		StringBuffer wholeStr = new StringBuffer();
+		while ((str = br.readLine()) != null) {
+			wholeStr.append(str);
+		}
+		Map<String, Object> map = new LinkedHashMap<>();
+		str = wholeStr.toString();
+		if (StringUtils.isNotBlank(str)) {
+			JsonUtils<Object> jsonUtils = new JsonUtils<Object>();
+			map = jsonUtils.getMapFromStr(str);
+		}
+		return map;
+	}
 
+	/**
+	 * 获取Map集合通过form表单数据
+	 * 
+	 * @param set
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> getParamByForm(Set<Entry<String, String[]>> set) {
+		Map<String, Object> map = new LinkedHashMap<String, Object>();
+		String indexMark = "@index";
+		for (Entry<String, String[]> entry : set) {
+			String key = entry.getKey();
+			List<String> list = Arrays.asList(entry.getValue());
+			String value = list.get(0);
+			Matcher matcher = keyRegExp(key);
+			if (matcher.find() && list.size() == 1) {
+				String k = matcher.group(1);
+				Integer index = Integer.valueOf(matcher.group(2));
+				String name = matcher.group(3);
+				Object object = map.get(k);
+				if (object == null) {
+					// 不存在于map集合
+					Map<String, Object> hashMap = new HashMap<String, Object>();
+					hashMap.put(name, value);
+					hashMap.put(indexMark, index);
+					List<Object> objList = new ArrayList<Object>();
+					objList.add(hashMap);
+					map.put(k, objList);
+				} else {
+					// 存在于map集合
+					List<Object> objList = (List<Object>) object;
+					boolean bool = false;
+					for (Object obj : objList) {
+						Map<String, Object> hashMap = (Map<String, Object>) obj;
+						Integer indexVal = (Integer) hashMap.get(indexMark);
+						if (index == indexVal) {
+							hashMap.put(name, value);
+							bool = true;
+							break;
+						}
+					}
+					if (!bool) {
+						Map<String, Object> hashMap = new HashMap<String, Object>();
+						hashMap.put(name, value);
+						hashMap.put(indexMark, index);
+						objList.add(hashMap);
+					}
+				}
+			} else {
+				if (list.size() == 1) {
+					map.put(key, value);
+				} else if (list.size() > 1) {
+					map.put(key, list);
+				}
+			}
+		}
+		return map;
+	}
+
+	/**
+	 * key 正则匹配
+	 * 
+	 * @param str
+	 * @return
+	 */
+	public Matcher keyRegExp(String str) {
+		String regex = "^([a-zA-Z].*)\\[(\\d+)\\]\\.([a-zA-Z].*)$";
+		Pattern r = Pattern.compile(regex);
+		return r.matcher(str);
+	}
+	
 	@Test
 	public void test() {
 
