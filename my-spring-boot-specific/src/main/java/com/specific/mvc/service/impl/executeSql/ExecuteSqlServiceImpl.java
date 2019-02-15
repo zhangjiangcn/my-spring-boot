@@ -2,15 +2,8 @@ package com.specific.mvc.service.impl.executeSql;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.Map.Entry;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.catalina.servlet4preview.http.HttpServletRequest;
@@ -19,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.specific.mvc.service.ExecuteSqlService;
-import com.specific.util.JsonUtils;
 import com.specific.util.ResultInfo;
 
 @Service
