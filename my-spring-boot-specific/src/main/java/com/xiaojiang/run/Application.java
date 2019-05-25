@@ -6,8 +6,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
-@ComponentScan(basePackages = {"com.specific.mvc,com.specific.config"})
-@MapperScan("com.specific.mvc.mapper")
+@ComponentScan(basePackages = {"com.xiaojiang.mvc,com.xiaojiang.config"})
+@MapperScan("com.xiaojiang.mvc.mapper")
 public class Application {
 
 	public static void main(String[] args) {

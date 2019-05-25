@@ -24,7 +24,7 @@ public class Swagger2 {
         return new Docket(DocumentationType.SWAGGER_2)
                 .apiInfo(apiInfo())
                 .select()
-                .apis(RequestHandlerSelectors.basePackage("com.specific.mvc.controller"))
+                .apis(RequestHandlerSelectors.basePackage("com.xiaojiang.mvc.controller"))
                 .paths(PathSelectors.any())
                 .build();
     }

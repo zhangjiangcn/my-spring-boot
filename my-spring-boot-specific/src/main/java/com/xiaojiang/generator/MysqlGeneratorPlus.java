@@ -142,7 +142,7 @@ public class MysqlGeneratorPlus{
             // 包配置
             new PackageConfig()
                 .setModuleName("")
-                .setParent("com.specific.mvc")// 自定义包路径
+                .setParent("com.xiaojiang.mvc")// 自定义包路径
                 .setController("controller")// 这里是控制器包名，默认 web
         ).setCfg(
             // 注入自定义配置，可以在 VM 中使用 cfg.abc 设置的值

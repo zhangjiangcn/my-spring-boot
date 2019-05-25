@@ -1,5 +1,5 @@
 package com.xiaojiang.interceptor;
-//package com.specific.config;
+//package com.xiaojiang.config;
 // 
 ///**
 // * Author:ZhuShangJin

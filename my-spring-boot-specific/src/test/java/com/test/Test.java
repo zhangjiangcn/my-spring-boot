@@ -15,7 +15,7 @@ public class Test {
         //定义数据源的xml片段
         String xml ="<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n" + 
         		"<!DOCTYPE mapper PUBLIC \"-//mybatis.org//DTD Mapper 3.0//EN\" \"http://mybatis.org/dtd/mybatis-3-mapper.dtd\">\r\n" + 
-        		"<mapper namespace=\"com.specific.mvc.mapper.SpecificInterfaceSqlMapper\">\r\n" + 
+        		"<mapper namespace=\"com.xiaojiang.mvc.mapper.SpecificInterfaceSqlMapper\">\r\n" + 
         		"	\r\n" + 
         		"	<select id=\"test\" parameterType=\"java.util.Map\" resultType=\"java.util.LinkedHashMap\">\r\n" + 
         		"		SELECT * FROM specific_interface_param\r\n" + 
