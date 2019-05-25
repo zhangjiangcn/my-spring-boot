@@ -89,21 +89,25 @@ public class ExecuteSqlMethod {
 		}
 
 		ExecutorService threadPool = Executors.newCachedThreadPool();
-		Map<String, Object> resultMap = new LinkedHashMap<String, Object>();
+		Map<String, Object> resultMap = new ConcurrentHashMap<String, Object>();
+		
 		for (int i = 0; i < dList.size(); i++) {
 			SpecificInterfaceSql sql = dList.get(i);
-			String dataSql = sql.getDataSql();
-			String dataSpace = sql.getDataSpace();
-			if (StringUtils.isBlank(dataSql)) {
-				resultMap.put(dataSpace, "sql语句 data_sql 为null或空字符串");
-				continue;
-			}
+			
 			// 执行线程
 			threadPool.execute(new Runnable() {
 
 				@Override
 				@SuppressWarnings("unchecked")
 				public void run() {
+					
+					String dataSql = sql.getDataSql();
+					String dataSpace = sql.getDataSpace();
+					if (StringUtils.isBlank(dataSql)) {
+						resultMap.put(dataSpace, "sql语句 data_sql 为null或空字符串");
+						return;
+					}
+					
 					Object result = null;
 
 					// 参数Map集合中添加数据，返回新的集合。
@@ -318,7 +322,7 @@ public class ExecuteSqlMethod {
 	 */
 	@SuppressWarnings("unchecked")
 	public Map<String, Object> listToMap(Object list) {
-		Map<String, Object> map = new ConcurrentHashMap<String, Object>();
+		Map<String, Object> map = new LinkedHashMap<String, Object>();
 		// 循环数据,进行数据的拼装
 		for (Map<String, Object> data : (List<Map<String, Object>>) list) {
 			if (data == null) {
@@ -366,7 +370,6 @@ public class ExecuteSqlMethod {
 	 * @param set
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	public Map<String, Object> getParamByForm(Set<Entry<String, String[]>> set) {
 		Map<String, Object> map = new LinkedHashMap<String, Object>();
 		String indexMark = "@index";
@@ -376,38 +379,7 @@ public class ExecuteSqlMethod {
 			String value = list.get(0);
 			Matcher matcher = keyRegExp(key);
 			if (matcher.find() && list.size() == 1) {
-				String k = matcher.group(1);
-				Integer index = Integer.valueOf(matcher.group(2));
-				String name = matcher.group(3);
-				Object object = map.get(k);
-				if (object == null) {
-					// 不存在于map集合
-					Map<String, Object> hashMap = new HashMap<String, Object>();
-					hashMap.put(name, value);
-					hashMap.put(indexMark, index);
-					List<Object> objList = new ArrayList<Object>();
-					objList.add(hashMap);
-					map.put(k, objList);
-				} else {
-					// 存在于map集合
-					List<Object> objList = (List<Object>) object;
-					boolean bool = false;
-					for (Object obj : objList) {
-						Map<String, Object> hashMap = (Map<String, Object>) obj;
-						Integer indexVal = (Integer) hashMap.get(indexMark);
-						if (index == indexVal) {
-							hashMap.put(name, value);
-							bool = true;
-							break;
-						}
-					}
-					if (!bool) {
-						Map<String, Object> hashMap = new HashMap<String, Object>();
-						hashMap.put(name, value);
-						hashMap.put(indexMark, index);
-						objList.add(hashMap);
-					}
-				}
+				this.formIndexParamHandle(map, indexMark, value, matcher);
 			} else {
 				if (list.size() == 1) {
 					map.put(key, value);
@@ -417,6 +389,49 @@ public class ExecuteSqlMethod {
 			}
 		}
 		return map;
+	}
+	
+	/**
+	 * form表单带有下标类似数组元素参数处理
+	 * @param map
+	 * @param indexMark
+	 * @param value
+	 * @param matcher
+	 */
+	@SuppressWarnings("unchecked")
+	private void formIndexParamHandle(Map<String, Object> map, String indexMark, String value, Matcher matcher) {
+		String k = matcher.group(1);
+		Integer index = Integer.valueOf(matcher.group(2));
+		String name = matcher.group(3);
+		Object object = map.get(k);
+		if (object == null) {
+			// 不存在于map集合
+			Map<String, Object> hashMap = new HashMap<String, Object>();
+			hashMap.put(name, value);
+			hashMap.put(indexMark, index);
+			List<Object> objList = new ArrayList<Object>();
+			objList.add(hashMap);
+			map.put(k, objList);
+		} else {
+			// 存在于map集合
+			List<Object> objList = (List<Object>) object;
+			boolean bool = false;
+			for (Object obj : objList) {
+				Map<String, Object> hashMap = (Map<String, Object>) obj;
+				Integer indexVal = (Integer) hashMap.get(indexMark);
+				if (index == indexVal) {
+					hashMap.put(name, value);
+					bool = true;
+					break;
+				}
+			}
+			if (!bool) {
+				Map<String, Object> hashMap = new HashMap<String, Object>();
+				hashMap.put(name, value);
+				hashMap.put(indexMark, index);
+				objList.add(hashMap);
+			}
+		}
 	}
 
 	/**

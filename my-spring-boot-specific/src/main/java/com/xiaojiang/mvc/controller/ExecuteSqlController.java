@@ -16,7 +16,7 @@ import com.xiaojiang.mvc.service.ExecuteSqlService;
  * @since 2019-02-03
  */
 @RestController
-@RequestMapping(value = "/executeSql", method = { RequestMethod.GET, RequestMethod.POST })
+@RequestMapping(value = "/executeSql")
 public class ExecuteSqlController {
 
 	@Autowired
@@ -29,9 +29,15 @@ public class ExecuteSqlController {
 	 * @param dmlMark
 	 * @return
 	 */
-	@RequestMapping(value = "/{dmlMark}")
-	public Object executeSql(HttpServletRequest request,@PathVariable String dmlMark){
+	@RequestMapping(value = "", method = { RequestMethod.GET})
+	public Object executeSqlGet(HttpServletRequest request){
 		// 根据已知条件查询数据库,返回结果集
-		return executeSqlService.executeSql(request,dmlMark);
+		return executeSqlService.executeSql(request,"query");
+	}
+	
+	@RequestMapping(value = "", method = { RequestMethod.POST,RequestMethod.PUT, RequestMethod.DELETE})
+	public Object executeSqlPost(HttpServletRequest request){
+		// 根据已知条件查询数据库,返回结果集
+		return executeSqlService.executeSql(request,"update");
 	}
 }
