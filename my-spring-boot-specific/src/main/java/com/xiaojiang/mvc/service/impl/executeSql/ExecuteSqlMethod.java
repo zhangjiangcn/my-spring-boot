@@ -41,7 +41,14 @@ import com.xiaojiang.mvc.service.SpecificInterfaceSqlService;
 import com.xiaojiang.util.JsonUtils;
 import com.xiaojiang.util.ResultInfo;
 
+/**
+ * 此类已过期
+ * 
+ * @author ZhangJiang
+ * @since 2019-05-26
+ */
 @Component
+@Deprecated
 public class ExecuteSqlMethod {
 
 	@Autowired
