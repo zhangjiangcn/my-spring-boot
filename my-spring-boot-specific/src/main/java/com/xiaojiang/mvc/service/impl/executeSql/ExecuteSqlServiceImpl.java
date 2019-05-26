@@ -303,16 +303,8 @@ public class ExecuteSqlServiceImpl implements ExecuteSqlService {
 			return errorList;
 		}
 		
-		
-		
-		/**************************** 打印 start ****************************/
-		System.out.println("sql语句: "+ sql);
-		System.out.println("参数列表");
-		
-		for (String key : map.keySet()) {
-			System.out.println("\t" + key + ": " + map.get(key));
-		}
-		/**************************** 打印 end ****************************/
+		// 打印执行sql语句
+		printsSql(map, sql);
 		
 		sql = "<script>" + sql + "</script>"; 
 		
@@ -321,6 +313,21 @@ public class ExecuteSqlServiceImpl implements ExecuteSqlService {
 		}else {
 			return sqlMapper.update(sql, map);
 		}
+	}
+	
+	/**
+	 * 打印执行sql语句
+	 * @param map
+	 * @param sql
+	 */
+	private void printsSql(Map<String, Object> map, String sql) {
+		System.out.println("/**************************** 打印 start ****************************/");
+		System.out.println("sql语句: ");
+		System.out.println(sql);
+		for (String key : map.keySet()) {
+			System.out.println("参数 {" + key + "}: " + map.get(key));
+		}
+		System.out.println("/**************************** 打印 end ****************************/");
 	}
 	
 	/**
@@ -334,11 +341,6 @@ public class ExecuteSqlServiceImpl implements ExecuteSqlService {
 
 		ConnectionSource source = ConnectionSourceHelper.getSingle(dataSource);
 		SQLManager sqlManager = new SQLManager(new MySqlStyle(), source);
-
-//		String key = "auto._gen_" + sql;
-//		SQLSource sqlSource = new SQLSource(key, sql);
-//		sqlManager.getSqlLoader().addSQL(key, sqlSource);
-//		SQLResult sqlResult = sqlManager.getSQLResult(sqlSource, map);
 
 		// beetl直接执行SQL模板
 		if (StringUtils.equals(dmlMark, "query")) {
