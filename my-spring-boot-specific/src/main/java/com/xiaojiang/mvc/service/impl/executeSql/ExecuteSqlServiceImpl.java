@@ -288,6 +288,9 @@ public class ExecuteSqlServiceImpl implements ExecuteSqlService {
 	 */
 	public Object processSqlBySqlTemplate(Map<String, Object> map, String sql, String dmlMark) throws Exception {
 		
+		// 打印执行sql语句
+		printsSql(map, sql);
+		
 		List<String> list = this.refParamRegExp(sql);
 		List<String> errorList = new ArrayList<String>();
 		
@@ -302,9 +305,6 @@ public class ExecuteSqlServiceImpl implements ExecuteSqlService {
 		if(errorList.size() > 0) {
 			return errorList;
 		}
-		
-		// 打印执行sql语句
-		printsSql(map, sql);
 		
 		sql = "<script>" + sql + "</script>"; 
 		
